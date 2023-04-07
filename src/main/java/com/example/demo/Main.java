@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@Component
 public class Main  {
 
     @GetMapping("/health")
@@ -13,6 +12,8 @@ public class Main  {
     public String checkHealth(){
         return "OK";
     }
+
+
     /*@Override
     protected void doHealthCheck(Health.Builder builder) throws Exception {
         builder.up()
