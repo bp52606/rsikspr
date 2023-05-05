@@ -5,18 +5,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class Main  {
+@Component
+public class CheckHealth {
 
     @GetMapping("/health")
 
-    public String checkHealth(){
+    public String healthChecker(){
         return "OK";
     }
 
 
-    /*@Override
-    protected void doHealthCheck(Health.Builder builder) throws Exception {
-        builder.up()
-                .withDetail("workingFine","OK");
-    }*/
 }
