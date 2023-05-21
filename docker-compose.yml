@@ -1,5 +1,18 @@
 version: '3.9'
+
 services:
+
+  app:
+    image: app
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres-server
+
   postgres-server:
     image: postgres
     container_name: some-postgres

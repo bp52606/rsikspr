@@ -14,5 +14,4 @@ public class CheckHealth {
         return "OK";
     }
 
-
 }
