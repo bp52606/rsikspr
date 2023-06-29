@@ -19,7 +19,8 @@ public class Message {
      */
 
     @Id
-    @GeneratedValue
+    @Column
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
     /*
@@ -35,6 +36,9 @@ public class Message {
 
     @Column
     private LocalDateTime dateTime;
+
+    @Column
+    private Long conversationId;
 
     public void setId(Long id) {
         this.id = id;
@@ -67,5 +71,13 @@ public class Message {
 
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public Long getConversationId() {
+        return conversationId;
+    }
+
+    public void setConversationId(Long conversationId) {
+        this.conversationId = conversationId;
     }
 }

@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.Conversation;
-import com.example.demo.dto.Message;
+import com.example.demo.dto.*;
 import com.example.demo.service.ConversationService;
+import com.example.demo.service.MessageService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +20,12 @@ import java.util.List;
 public class ChatController {
 
     private final ConversationService conversationService;
+    private final MessageService messageService;
 
 
     @PostMapping("/chats/{chatId}/myChat")
     public ResponseEntity<String> chatter(@PathVariable("chatId") Long chatId,
-                                          @RequestBody Message message) {
+                                          @RequestBody JsonNode messageNode) {
 
         List<Conversation> chatsById = conversationService.getConversationsByConversationId(chatId);
 
@@ -40,6 +41,57 @@ public class ChatController {
 
         }
 
+        Message message = new Message();
+        message.setConversationId(conversation.getId());
+
+        if(messageNode.has("from")) {
+            String sender = messageNode.get("from").asText();
+            message.setSender(sender);
+
+        } else {
+            return ResponseEntity.badRequest().body("Invalid message format");
+        }
+
+        String to;
+
+        if(messageNode.has("to")){
+            to = messageNode.get("to").asText();
+        } else {
+            return ResponseEntity.badRequest().body("Invalid message format");
+        }
+
+        String content;
+        if(messageNode.has("content")) {
+
+            Content cnt = new Content();
+
+            if(messageNode.get("content").has("text")){
+
+                content = messageNode.get("content").get("text").asText();
+                cnt.setText(messageNode.get("content").get("text").asText());
+
+            } else {
+
+                return ResponseEntity.badRequest().body("Invalid message format");
+            }
+
+            if(messageNode.has("displayName")){
+
+            } else {
+
+                return ResponseEntity.badRequest().body("Invalid message format");
+            }
+
+        } else if(messageNode.has("text")){
+
+            content = messageNode.get("text").asText();
+
+        } else {
+            return ResponseEntity.badRequest().body("Invalid message format");
+        }
+
+        message.setContent(content);
+
         conversation.setInputMessage(message);
 
         // nadi odgovor ako je definiran u json datoteci
@@ -47,10 +99,32 @@ public class ChatController {
 
         conversation.setOutputMessage(reply);
         conversation.setSender(message.getSender());
+
+        message.setId(1L);
+        messageService.saveMessage(message);
         conversationService.saveConversation(conversation);
+
 
         return ResponseEntity.status(HttpStatus.CREATED).body(reply);
 
+    }
+
+
+
+    @GetMapping("/chats/{chatId}/myChat")
+    public List<Message> displayMessagesInConversation(Conversation conversation){
+        return messageService.getMessagesFromConversation(conversation);
+    }
+
+    @GetMapping("/chats/{chatId}")
+    public List<Conversation> displayConversationsFromUser(Conversation conversation){
+        return conversationService.getConversationsBySender(conversation.getSender());
+    }
+
+
+    @GetMapping("/chats")
+    public List<Conversation> displayConversations(){
+        return conversationService.getAllConversations();
     }
 
     private String generateReply(String message) {

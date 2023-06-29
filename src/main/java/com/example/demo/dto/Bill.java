@@ -19,8 +19,8 @@ public class Bill {
     private double cost;
 
 
-    @Column
-    private String user;
+    @Column(name = "userName", nullable = false)
+    private String userName;
 
     public Long getId() {
         return id;
@@ -46,11 +46,11 @@ public class Bill {
         this.cost = cost;
     }
 
-    public String getUser() {
-        return user;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

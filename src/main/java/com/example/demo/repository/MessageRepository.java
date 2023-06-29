@@ -13,7 +13,7 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, String> {
 
     @Override
-    public List<Message> findAllById(Iterable<String> strings);
+    List<Message> findAllById(Iterable<String> strings);
 
-    public List<Message> findByConversationId(Long conversationId);
+    List<Message> findByConversationId(Long conversationId);
 }

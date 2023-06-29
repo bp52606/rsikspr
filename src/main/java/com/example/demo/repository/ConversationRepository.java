@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
 
-    Optional<Conversation> findBySender(String sender);
+    List<Conversation> findBySender(String sender);
 
     @Override
     List<Conversation> findAllById(Iterable<Long> longs);

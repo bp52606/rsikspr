@@ -2,8 +2,9 @@ package com.example.demo.service;
 
 import com.example.demo.dto.Bill;
 import com.example.demo.dto.Conversation;
+import com.example.demo.repository.BillRepository;
 import com.example.demo.repository.ConversationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ConversationService  {
 
     private final ConversationRepository conversationRepository;
@@ -20,12 +22,8 @@ public class ConversationService  {
 
     private final MessageService messageService;
 
-    @Autowired
-    public ConversationService(ConversationRepository conversationRepository, BillingService billingService, MessageService messageService) {
-        this.conversationRepository = conversationRepository;
-        this.billingService = billingService;
-        this.messageService = messageService;
-    }
+    private final BillRepository billRepository;
+
 
     public void saveConversation(Conversation conversation) {
         conversationRepository.save(conversation);
@@ -33,6 +31,10 @@ public class ConversationService  {
 
     public List<Conversation> getConversationsByConversationId(Long conversationId) {
         return conversationRepository.findAllById(Collections.singleton(conversationId));
+    }
+
+    public List<Conversation> getConversationsBySender(String sender) {
+        return conversationRepository.findBySender(sender);
     }
 
     // creates conversation, returns its id
@@ -61,6 +63,7 @@ public class ConversationService  {
             double price = billingService.calculateConversationBill(messageService.getMessagesFromConversation(conversation));
 
             Bill bill = billingService.createABill(conversation.getSender(),price,conversationId);
+            billRepository.save(bill);
 
             try {
                 billingService.sendBillToUser(bill);
