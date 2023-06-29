@@ -18,8 +18,9 @@ public class Bill {
     @Column(name = "cost", nullable = false)
     private double cost;
 
+
     @Column
-    private Long userId;
+    private String user;
 
     public Long getId() {
         return id;
@@ -45,11 +46,11 @@ public class Bill {
         this.cost = cost;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(String user) {
+        this.user = user;
     }
 }

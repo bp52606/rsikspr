@@ -1,10 +1,11 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.Bill;
 import com.example.demo.dto.Conversation;
-import com.example.demo.dto.Message;
 import com.example.demo.repository.ConversationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import javax.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +58,15 @@ public class ConversationService  {
             conversation.setEnded(LocalDateTime.now());
             conversationRepository.save(conversation);
 
-            billingService.calculateConversationBill(messageService.getMessagesFromConversation(conversation));
+            double price = billingService.calculateConversationBill(messageService.getMessagesFromConversation(conversation));
+
+            Bill bill = billingService.createABill(conversation.getSender(),price,conversationId);
+
+            try {
+                billingService.sendBillToUser(bill);
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
 
         }
 
@@ -67,21 +76,21 @@ public class ConversationService  {
         return  conversationRepository.findAll();
     }
 
-//    public List<Conversation> getOpenConversations(){
-//
-//    }
+    public List<Conversation> getOpenConversations(){
 
-    public void deleteConversation(Long conversationId){
+        return conversationRepository.findByStartedNotNullAndEndedNull();
 
     }
 
-//    public List<Message> getConversationHistory(Long conversationId){
-//
-//    }
+    public void deleteConversation(Long conversationId){
+
+        Optional<Conversation> optConversation = conversationRepository.findById(conversationId);
+
+        if(optConversation.isPresent()){
+            conversationRepository.delete(conversationRepository.findById(conversationId).get());
+        }
 
 
-
-
-
+    }
 
 }
