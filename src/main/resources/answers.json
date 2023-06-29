@@ -1,0 +1,24 @@
+{
+  "answers": [
+    {
+      "message": "Hello",
+      "reply": "Hello!"
+    },
+    {
+      "message": "How are you?",
+      "reply": "I'm doing well, thank you! How are you?"
+    },
+    {
+      "message": "What is your name?",
+      "reply": "My name is Chatbot."
+    },
+    {
+      "message": "How old are you?",
+      "reply": "I do not have a defined age."
+    },
+    {
+      "message": "What is the capital of Croatia?",
+      "reply": "The capital of Croatia is Zagreb."
+    }
+  ]
+}
