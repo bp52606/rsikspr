@@ -1,12 +1,17 @@
 package com.example.demo.service;
 
+import com.example.demo.controller.ChatController;
 import com.example.demo.dto.Bill;
 import com.example.demo.dto.Conversation;
 import com.example.demo.repository.BillRepository;
 import com.example.demo.repository.ConversationRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +52,7 @@ public class ConversationService  {
 
     }
 
-    public void closeConversation(Long conversationId){
+    public Long closeConversation(Long conversationId){
 
         Optional<Conversation> conversationOptional = conversationRepository.findById(conversationId);
         Conversation conversation = null;
@@ -60,7 +65,7 @@ public class ConversationService  {
             conversation.setEnded(LocalDateTime.now());
             conversationRepository.save(conversation);
 
-            double price = billingService.calculateConversationBill(messageService.getMessagesFromConversation(conversation));
+            double price = billingService.calculateConversationBill(messageService.getMessagesFromConversation(conversation.getId()));
 
             Bill bill = billingService.createABill(conversation.getSender(),price,conversationId);
             billRepository.save(bill);
@@ -72,6 +77,8 @@ public class ConversationService  {
             }
 
         }
+
+        return conversationId;
 
     }
 
@@ -85,14 +92,39 @@ public class ConversationService  {
 
     }
 
-    public void deleteConversation(Long conversationId){
+    public Long deleteConversation(Long conversationId){
 
         Optional<Conversation> optConversation = conversationRepository.findById(conversationId);
 
         if(optConversation.isPresent()){
             conversationRepository.delete(conversationRepository.findById(conversationId).get());
+            return conversationId;
+        }
+        return null;
+
+    }
+
+    public String generateReply(String message) {
+
+        try (InputStream inputStream = ChatController.class.getResourceAsStream("/answers.json")) {
+            byte[] jsonData = inputStream.readAllBytes();
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(jsonData);
+
+            JsonNode answersNode = jsonNode.get("answers");
+            for (JsonNode answerNode : answersNode) {
+                String answerMessage = answerNode.get("message").asText();
+                String reply = answerNode.get("reply").asText();
+                if (message.equalsIgnoreCase(answerMessage)) {
+                    return reply;
+                }
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
+        return "Your input hasn't got a defined answer.";
 
     }
 

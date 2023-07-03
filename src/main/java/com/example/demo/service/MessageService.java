@@ -19,7 +19,7 @@ public class MessageService {
 
     }
 
-    public List<Message> getMessagesFromConversation(Conversation conversation){
-        return messageRepository.findByConversationId(conversation.getId());
+    public List<Message> getMessagesFromConversation(Long chatId){
+        return messageRepository.findByConversationId(chatId);
     }
 }

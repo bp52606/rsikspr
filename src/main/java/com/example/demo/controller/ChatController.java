@@ -4,15 +4,16 @@ import com.example.demo.dto.*;
 import com.example.demo.service.ConversationService;
 import com.example.demo.service.MessageService;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 @RestController
 @Component
@@ -95,61 +96,57 @@ public class ChatController {
         conversation.setInputMessage(message);
 
         // nadi odgovor ako je definiran u json datoteci
-        reply = generateReply(message.getContent());
+        reply = conversationService.generateReply(message.getContent());
+        Message messageReply = new Message();
+        messageReply.setSender("Chatbot");
+        messageReply.setContent(reply);
+        messageReply.setConversationId(chatId);
+        messageReply.setDateTime(LocalDateTime.now());
 
         conversation.setOutputMessage(reply);
         conversation.setSender(message.getSender());
 
-        message.setId(1L);
+        Random random = new Random();
+        message.setId(random.nextLong());
         messageService.saveMessage(message);
+        messageReply.setId(random.nextLong());
+        messageService.saveMessage(messageReply);
         conversationService.saveConversation(conversation);
-
 
         return ResponseEntity.status(HttpStatus.CREATED).body(reply);
 
     }
 
-
-
     @GetMapping("/chats/{chatId}/myChat")
-    public List<Message> displayMessagesInConversation(Conversation conversation){
-        return messageService.getMessagesFromConversation(conversation);
+    public List<String> displayMessagesInConversation(@PathVariable("chatId") Long chatId){
+        return messageService.getMessagesFromConversation(chatId).stream().map(a->a.getContent()).collect(Collectors.toList());
     }
 
     @GetMapping("/chats/{chatId}")
-    public List<Conversation> displayConversationsFromUser(Conversation conversation){
-        return conversationService.getConversationsBySender(conversation.getSender());
+    public ResponseEntity<?> displayConversationsFromUser(Conversation conversation){
+        return ResponseEntity.ok().body(conversationService.getConversationsBySender(conversation.getSender()));
     }
 
 
     @GetMapping("/chats")
-    public List<Conversation> displayConversations(){
-        return conversationService.getAllConversations();
+    public ResponseEntity<?> displayConversations(){
+        return ResponseEntity.ok().body(conversationService.getAllConversations());
     }
 
-    private String generateReply(String message) {
 
-        try (InputStream inputStream = ChatController.class.getResourceAsStream("/answers.json")) {
-            byte[] jsonData = inputStream.readAllBytes();
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(jsonData);
-
-            JsonNode answersNode = jsonNode.get("answers");
-            for (JsonNode answerNode : answersNode) {
-                String answerMessage = answerNode.get("message").asText();
-                String reply = answerNode.get("reply").asText();
-                if (message.equalsIgnoreCase(answerMessage)) {
-                    return reply;
-                }
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return "Your input hasn't got a defined answer.";
-
+    @PostMapping("/chats/delete")
+    public ResponseEntity<?> deleteConversation(@RequestBody Conversation conversation){
+        return ResponseEntity.ok().body(conversationService.deleteConversation(conversation.getId()));
     }
 
+    @PostMapping("/chats/openConversations")
+    public ResponseEntity<?> listOpenConversations(){
+        return ResponseEntity.ok().body(conversationService.getOpenConversations());
+    }
+
+    @PostMapping("/chats/close")
+    public ResponseEntity<?> closeConversation(@RequestBody Conversation conversation){
+        return ResponseEntity.ok().body(conversationService.closeConversation(conversation.getId()));
+    }
 
 }

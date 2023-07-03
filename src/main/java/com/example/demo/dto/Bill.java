@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 public class Bill {
 
     @Id
+    @Column(name = "id", nullable = false)
     @GeneratedValue
     private Long id;
 
