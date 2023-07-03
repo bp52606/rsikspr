@@ -19,6 +19,10 @@
     {
       "message": "What is the capital of Croatia?",
       "reply": "The capital of Croatia is Zagreb."
+    },
+    {
+      "message": "Bye",
+      "reply": "Bye!"
     }
   ]
 }

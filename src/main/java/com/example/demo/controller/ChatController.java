@@ -83,6 +83,10 @@ public class ChatController {
                 return ResponseEntity.badRequest().body("Invalid message format");
             }
 
+            if(cnt.equals("Bye")){
+                closeConversation(conversation);
+            }
+
         } else if(messageNode.has("text")){
 
             content = messageNode.get("text").asText();
@@ -123,8 +127,8 @@ public class ChatController {
     }
 
     @GetMapping("/chats/{chatId}")
-    public ResponseEntity<?> displayConversationsFromUser(Conversation conversation){
-        return ResponseEntity.ok().body(conversationService.getConversationsBySender(conversation.getSender()));
+    public ResponseEntity<?> displayConversationsFromUser(@PathVariable("chatId") Long chatId){
+        return ResponseEntity.ok().body(conversationService.getConversationsByConversationId(chatId));
     }
 
 
